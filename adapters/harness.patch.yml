@@ -1,0 +1,35 @@
+# Required adapter environment: FEISHU_WORKSPACE, FEISHU_PYTHON, FEISHU_ADAPTER.
+# Set them to absolute paths. DSH_MODULE_ROOT points to the installed profiles.
+- id: headless-startup
+  disabled: true
+- id: headless-runner
+  disabled: true
+- id: session-title-llm
+  disabled: true
+- id: session-persistence-jsonl
+  config:
+    root: !!js process.env.FEISHU_WORKSPACE + '/sessions'
+- id: storage-json
+  config:
+    root: !!js process.env.FEISHU_WORKSPACE + '/storages'
+- id: attachment-local
+  config:
+    dshHome: !!js process.env.FEISHU_WORKSPACE
+- insert:
+    - id: sdk-app-startup
+      name: '@deepseek-ai/dsh-sdk-app'
+      config:
+        profile: headless
+    - id: feishu-mcp
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        transport: stdio
+        serverName: feishu
+        command: !!js process.env.FEISHU_PYTHON
+        args: ['-m', 'feishu_agent.cli', 'mcp']
+        cwd: !!js process.env.FEISHU_WORKSPACE
+        env:
+          PYTHONUTF8: '1'
+        failOnStartupError: true
+    - id: feishu-adapter
+      name: !!js process.env.FEISHU_ADAPTER
